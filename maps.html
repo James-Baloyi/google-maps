@@ -1,18 +1,57 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title></title>
-    <style type="text/css">
-        body
-        {
-            font-family: Arial;
-            font-size: 10pt;
-        }
-    </style>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'>
+    <script src="https://www.gstatic.com/firebasejs/5.9.3/firebase.js"></script>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyDD5e6xEvq7J53_cdj9K2BOrXGs23TTxJU",
+        authDomain: "my-awesome-project-7b82d.firebaseapp.com",
+        databaseURL: "https://my-awesome-project-7b82d.firebaseio.com",
+        projectId: "my-awesome-project-7b82d",
+        storageBucket: "my-awesome-project-7b82d.appspot.com",
+        messagingSenderId: "1086302413473",
+        appId: "1:1086302413473:web:d7d4a96c41ba2608"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
-    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDMIizZ49AcXojEeG1Qmckb-uduyvX6hY"></script>
     <script type="text/javascript">
-        var markers = [
+    var coordArray = new Array();
+    var uid = '<?echo $_GET["uid"]?>';
+    var counter = 0;
+    firebase.database().ref('currentRequest/'+uid).on('value', result => {
+        console.log(result.val().coords)
+        var lat = result.val().coords.split(',')[0];
+        var lng = result.val().coords.split(',')[1];
+        coordArray.push(lat);
+        coordArray.push(lng);
+        if (counter == 0){
+             LoadMap();
+        }else{
+            this.SetMarker2(lat,lng);
+        }
+        counter++
+        
+    })
+    
+           function SetMarker2(lat,lng) {
+            //Remove previous Marker.
+            if (marker != null) {
+                marker.setMap(null);
+            }
+ 
+            //Set Marker on Map.
+            var myLatlng = new google.maps.LatLng(lat, lng);
+            marker = new google.maps.Marker({
+                position: myLatlng,
+                map: map,
+            });
+        };
+    
+           var markers = [
     {
         "title": 'Aksa Beach',
         "lat": '19.1759668',
@@ -44,15 +83,12 @@
         "description": 'Sanjay Gandhi National Park is a large protected area in the northern part of Mumbai city.'
     }
     ];
-        window.onload = function () {
-            LoadMap();
-        };
  
         var map;
         var marker;
         function LoadMap() {
             var mapOptions = {
-                center: new google.maps.LatLng(markers[0].lat, markers[0].lng),
+                center: new google.maps.LatLng(-26.1486863,27.8895862),
                 zoom: 10,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
@@ -63,42 +99,39 @@
             //Remove previous Marker.
             if (marker != null) {
                 marker.setMap(null);
+                console.log('not null')
             }
  
             //Set Marker on Map.
-            var data = markers[position];
+            var data = {
+                'lat': coordArray[0],
+                'lng': coordArray[1]
+            }
             var myLatlng = new google.maps.LatLng(data.lat, data.lng);
             marker = new google.maps.Marker({
                 position: myLatlng,
                 map: map,
-                title: data.title
             });
- 
-            //Create and open InfoWindow.
-            var infoWindow = new google.maps.InfoWindow();
-            infoWindow.setContent("<div style = 'width:200px;min-height:40px'>" + data.description + "</div>");
-            infoWindow.open(map, marker);
-        };
+            var url = '<?echo $_GET['x']?>';
+            alert(url);
+            var lat = parseFloat(url.split(',')[0]);
+            var lng = parseFloat(url.split(',')[1]);
+            var myLatlng2 = new google.maps.LatLng(lat, lng);
+            var marker2 = new google.maps.Marker({
+                position: myLatlng2,
+                map: map,
+            });
+            marker2.setMap(map);
+        }
     </script>
-    <div>
-        <label for="rbMarker0">
-            <input type="radio" id="rbMarker0" name="rbMarker" value="0" onclick="SetMarker(this.value)"
-                checked="checked" />Aksa Beach</label><br />
-        <label for="rbMarker1">
-            <input type="radio" id="rbMarker1" name="rbMarker" value="1" onclick="SetMarker(this.value)" />Juhu
-            Beach</label><br />
-        <label for="rbMarker2">
-            <input type="radio" id="rbMarker2" name="rbMarker" value="2" onclick="SetMarker(this.value)" />Girgaum
-            Beach</label><br />
-        <label for="rbMarker3">
-            <input type="radio" id="rbMarker3" name="rbMarker" value="3" onclick="SetMarker(this.value)" />Jijamata
-            Udyan</label><br />
-        <label for="rbMarker4">
-            <input type="radio" id="rbMarker4" name="rbMarker" value="4" onclick="SetMarker(this.value)" />Sanjay
-            Gandhi National Park</label>
+<div id="dvMap" style="width: 100%;height: 100%">
     </div>
-    <hr />
-    <div id="dvMap" style="width: 400px; height: 500px">
-    </div>
+    <style>
+    body{
+        padding: 0;
+        margin: 0;
+        
+    }
+    </style>
 </body>
 </html>
